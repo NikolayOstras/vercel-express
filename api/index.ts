@@ -12,7 +12,7 @@ const foo = async function (req, res) {
 	const browser = await puppeteer.launch({
 		executablePath,
 		args: edgeChromium.args,
-		headless: true,
+		headless: edgeChromium.headless,
 	})
 
 	const page = await browser.newPage()
