@@ -1,27 +1,20 @@
-import edgeChromium from 'chrome-aws-lambda'
-import express from 'express'
-import puppeteer from 'puppeteer-core'
-const LOCAL_CHROME_EXECUTABLE =
-	'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
-const app = express()
-const foo = async function (req, res) {
-	// Edge executable will return an empty string locally.
-	const executablePath =
-		(await edgeChromium.executablePath) || LOCAL_CHROME_EXECUTABLE
+const chromium = require('@sparticuz/chromium-min')
+const puppeteer = require('puppeteer-core')
 
+module.exports = async (req, res) => {
 	const browser = await puppeteer.launch({
-		executablePath,
-		args: edgeChromium.args,
-		headless: edgeChromium.headless,
+		args: chromium.args,
+		defaultViewport: chromium.defaultViewport,
+		executablePath: await chromium.executablePath(
+			'https://github.com/Sparticuz/chromium/releases/download/v116.0.0/chromium-v116.0.0-pack.tar'
+		), // or your tar URL
+		headless: chromium.headless,
 	})
 
 	const page = await browser.newPage()
-	await page.goto('https://github.com')
+	await page.goto('https://example.com')
+	const content = await page.content()
 
-	res.send('hello')
+	await browser.close()
+	res.status(200).send(content)
 }
-
-app.get('/', (req, res) => res.send('Express on Vercel'))
-app.get('/foo', foo)
-
-app.listen(3000, () => console.log('Server ready on port 3000.'))
